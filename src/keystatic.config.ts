@@ -12,6 +12,7 @@ export default config({
         process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_SLUG ||
         process.env.VERCEL_GIT_REPO_SLUG!,
     },
+    branchPrefix: 'keystatic/',
   },
   collections: {
     posts: collection({
