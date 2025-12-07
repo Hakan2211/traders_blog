@@ -5,8 +5,12 @@ export default config({
   storage: {
     kind: 'github',
     repo: {
-      owner: process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_OWNER!,
-      name: process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_SLUG!,
+      owner:
+        process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_OWNER ||
+        process.env.VERCEL_GIT_REPO_OWNER!,
+      name:
+        process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_SLUG ||
+        process.env.VERCEL_GIT_REPO_SLUG!,
     },
   },
   collections: {
