@@ -8,11 +8,8 @@ export default config({
       : {
           kind: 'github',
           repo: {
-            owner:
-              process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_OWNER ||
-              'YOUR_GITHUB_USERNAME',
-            name:
-              process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_SLUG || 'YOUR_REPO_NAME',
+            owner: 'Hakan2211',
+            name: 'traders_blog',
           },
         },
   collections: {
