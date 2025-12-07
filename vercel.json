@@ -1,0 +1,13 @@
+{
+  "env": {
+    "KEYSTATIC_GITHUB_CLIENT_ID": {
+      "description": "Client ID from your GitHub OAuth App"
+    },
+    "KEYSTATIC_GITHUB_CLIENT_SECRET": {
+      "description": "Client Secret from your GitHub OAuth App"
+    },
+    "KEYSTATIC_SECRET": {
+      "description": "A random long string for session security"
+    }
+  }
+}
