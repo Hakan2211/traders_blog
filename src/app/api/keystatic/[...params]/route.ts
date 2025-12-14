@@ -16,9 +16,45 @@ try {
   console.error('[DEBUG] Failed to delete env var:', e);
 }
 
-const { GET: _GET, POST: _POST } = makeRouteHandler({
-  config,
-});
+const hasGithubAuthEnv =
+  !!process.env.KEYSTATIC_GITHUB_CLIENT_ID &&
+  !!process.env.KEYSTATIC_GITHUB_CLIENT_SECRET &&
+  !!process.env.KEYSTATIC_SECRET;
+
+let _GET: (req: NextRequest) => Promise<Response>;
+let _POST: (req: NextRequest) => Promise<Response>;
+
+// Avoid failing the build if GitHub auth env vars aren't present.
+// When `keystatic.config.ts` falls back to `local` storage, Keystatic doesn't need these.
+if ((config as any)?.storage?.kind === 'github' && !hasGithubAuthEnv) {
+  console.warn(
+    [
+      '[keystatic] storage.kind is "github" but required env vars are missing.',
+      'Missing one or more of: KEYSTATIC_GITHUB_CLIENT_ID, KEYSTATIC_GITHUB_CLIENT_SECRET, KEYSTATIC_SECRET',
+      'Keystatic API endpoints will return 500 until configured.',
+    ].join('\n')
+  );
+
+  _GET = async () =>
+    new Response('Keystatic is not configured (missing env vars).', {
+      status: 500,
+    });
+  _POST = async () =>
+    new Response('Keystatic is not configured (missing env vars).', {
+      status: 500,
+    });
+} else {
+  const handlers = makeRouteHandler({
+    config,
+    // Only required when storage.kind === 'github'
+    clientId: process.env.KEYSTATIC_GITHUB_CLIENT_ID,
+    clientSecret: process.env.KEYSTATIC_GITHUB_CLIENT_SECRET,
+    secret: process.env.KEYSTATIC_SECRET,
+  });
+  _GET = handlers.GET;
+  _POST = handlers.POST;
+}
+
 export const POST = _POST;
 
 export async function GET(req: NextRequest, props: any) {
