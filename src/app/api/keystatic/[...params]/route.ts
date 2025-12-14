@@ -82,6 +82,13 @@ export async function GET(req: NextRequest, props: any) {
     }
   }
 
+  // Workaround for potential Vercel/Next.js URL normalization issues causing signature mismatch
+  // If the request URL has a trailing slash but Keystatic doesn't expect it (or vice-versa), authentication can fail.
+  // We don't change the request here, but we log the incoming URL to check if it matches the registered callback.
+  if (isCallback) {
+    console.log(`[DEBUG] Incoming Callback URL Pathname: ${url.pathname}`);
+  }
+
   const response = await _GET(req);
 
   if (isCallback) {
