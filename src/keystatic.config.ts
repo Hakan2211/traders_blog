@@ -5,7 +5,7 @@ export default config({
     kind: 'cloud',
   },
   cloud: {
-    project: 'traders-blog/traders-blog', // Update this with your Keystatic Cloud project slug
+    project: 'hakanda/tradersblog',
   },
   collections: {
     posts: collection({
