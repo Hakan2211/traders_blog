@@ -2,6 +2,20 @@ import { makeRouteHandler } from '@keystatic/next/route-handler';
 import config from '@/keystatic.config';
 import { NextRequest } from 'next/server';
 
+// Force removal of the App Slug which might trigger the wrong Auth flow (GitHub App vs OAuth App)
+// The user has configured an OAuth App, so this variable should not be present.
+// We delete it here to ensure Keystatic uses the correct OAuth flow.
+try {
+  if (process.env.NEXT_PUBLIC_KEYSTATIC_GITHUB_APP_SLUG) {
+    console.log(
+      '[DEBUG] Removing conflicting env var: NEXT_PUBLIC_KEYSTATIC_GITHUB_APP_SLUG'
+    );
+    delete process.env.NEXT_PUBLIC_KEYSTATIC_GITHUB_APP_SLUG;
+  }
+} catch (e) {
+  console.error('[DEBUG] Failed to delete env var:', e);
+}
+
 const { GET: _GET, POST: _POST } = makeRouteHandler({
   config,
 });

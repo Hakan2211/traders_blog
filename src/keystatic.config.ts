@@ -2,18 +2,23 @@
 import { config, fields, collection } from '@keystatic/core';
 
 export default config({
-  storage: {
-    kind: 'github',
-    repo: {
-      owner:
-        process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_OWNER ||
-        process.env.VERCEL_GIT_REPO_OWNER!,
-      name:
-        process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_SLUG ||
-        process.env.VERCEL_GIT_REPO_SLUG!,
-    },
-    branchPrefix: 'keystatic/',
-  },
+  storage:
+    process.env.NODE_ENV === 'development'
+      ? {
+          kind: 'local',
+        }
+      : {
+          kind: 'github',
+          repo: {
+            owner:
+              process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_OWNER ||
+              process.env.VERCEL_GIT_REPO_OWNER!,
+            name:
+              process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_SLUG ||
+              process.env.VERCEL_GIT_REPO_SLUG!,
+          },
+          branchPrefix: 'keystatic/',
+        },
   collections: {
     posts: collection({
       label: 'Posts',
