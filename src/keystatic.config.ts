@@ -1,28 +1,34 @@
 // keystatic.config.ts
-import { config, fields, collection } from '@keystatic/core';
+import {
+  config,
+  fields,
+  collection,
+  LocalConfig,
+  GitHubConfig,
+} from '@keystatic/core';
+
+const storage: LocalConfig['storage'] | GitHubConfig['storage'] =
+  process.env.NODE_ENV === 'development'
+    ? {
+        kind: 'local',
+      }
+    : ({
+        kind: 'github',
+        clientId: process.env.KEYSTATIC_GITHUB_CLIENT_ID,
+        clientSecret: process.env.KEYSTATIC_GITHUB_CLIENT_SECRET,
+        repo: {
+          owner:
+            process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_OWNER ||
+            process.env.VERCEL_GIT_REPO_OWNER!,
+          name:
+            process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_SLUG ||
+            process.env.VERCEL_GIT_REPO_SLUG!,
+        },
+        branchPrefix: 'keystatic/',
+      } as unknown as GitHubConfig['storage']);
 
 export default config({
-  storage:
-    process.env.NODE_ENV === 'development'
-      ? {
-          kind: 'local',
-        }
-      : {
-          kind: 'github',
-          // @ts-ignore
-          clientId: process.env.KEYSTATIC_GITHUB_CLIENT_ID,
-          // @ts-ignore
-          clientSecret: process.env.KEYSTATIC_GITHUB_CLIENT_SECRET,
-          repo: {
-            owner:
-              process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_OWNER ||
-              process.env.VERCEL_GIT_REPO_OWNER!,
-            name:
-              process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_SLUG ||
-              process.env.VERCEL_GIT_REPO_SLUG!,
-          },
-          branchPrefix: 'keystatic/',
-        },
+  storage,
   collections: {
     posts: collection({
       label: 'Posts',
