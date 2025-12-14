@@ -1,11 +1,10 @@
 # Traders Blog
 
-A Next.js blog with Keystatic CMS and GitHub OAuth authentication.
+A Next.js blog with Keystatic Cloud CMS.
 
 ## Features
 
-- 📝 **Keystatic CMS** - Visual content editor at `/keystatic`
-- 🔐 **GitHub OAuth** - Secure authentication for content editing
+- 📝 **Keystatic Cloud** - Hosted content management at `/keystatic`
 - 📱 **Responsive Design** - Works on all devices
 - 🚀 **Vercel Ready** - One-click deploy with Git integration
 
@@ -36,47 +35,16 @@ A Next.js blog with Keystatic CMS and GitHub OAuth authentication.
    - Blog: [http://localhost:3000](http://localhost:3000)
    - Admin: [http://localhost:3000/keystatic](http://localhost:3000/keystatic)
 
-In local development, Keystatic runs in **local mode** - no GitHub authentication required. Content is saved directly to your filesystem.
+In local development, Keystatic runs in **local mode** - content is saved directly to your filesystem.
 
-### Production Setup (Vercel + GitHub OAuth)
+### Production Setup (Keystatic Cloud)
 
-For production, Keystatic uses GitHub as the content storage backend. You'll need to set up GitHub OAuth.
+For production, the blog uses Keystatic Cloud for content management.
 
-#### Step 1: Create a GitHub OAuth App
-
-1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
-2. Click **"New OAuth App"**
-3. Fill in the details:
-   - **Application name**: Traders Blog Admin
-   - **Homepage URL**: `https://your-domain.vercel.app`
-   - **Authorization callback URL**: `https://your-domain.vercel.app/api/keystatic/github/oauth/callback`
-4. Click **"Register application"**
-5. Copy the **Client ID**
-6. Click **"Generate a new client secret"** and copy it
-
-#### Step 2: Generate a Secret Key
-
-Generate a random secret for session encryption:
-
-```bash
-openssl rand -hex 32
-```
-
-#### Step 3: Configure Vercel Environment Variables
-
-In your Vercel project settings, add these environment variables:
-
-| Variable                         | Value                               |
-| -------------------------------- | ----------------------------------- |
-| `KEYSTATIC_GITHUB_CLIENT_ID`     | Your GitHub OAuth Client ID         |
-| `KEYSTATIC_GITHUB_CLIENT_SECRET` | Your GitHub OAuth Client Secret     |
-| `KEYSTATIC_SECRET`               | The random hex string you generated |
-
-**Note**: Vercel automatically sets `NEXT_PUBLIC_VERCEL_GIT_REPO_OWNER` and `NEXT_PUBLIC_VERCEL_GIT_REPO_SLUG` when you connect a GitHub repo.
-
-#### Step 4: Deploy
-
-Deploy to Vercel, and your admin panel at `/keystatic` will now require GitHub login.
+1. Sign up at [Keystatic Cloud](https://keystatic.cloud)
+2. Create a new project and connect your GitHub repo
+3. Update the `cloud.project` in `keystatic.config.ts` with your project slug
+4. Deploy to Vercel
 
 ## Project Structure
 
@@ -96,27 +64,22 @@ my-app/
 │   ├── lib/
 │   │   └── reader.ts    # Keystatic content reader
 │   └── keystatic.config.ts   # Keystatic configuration
-└── .env.example         # Environment variables template
 ```
 
 ## Creating Content
 
-1. Go to `/keystatic` (requires GitHub login in production)
-2. Click **"Posts"** in the sidebar
-3. Click **"Create"** to add a new post
-4. Fill in:
-   - **Title**: The post title (auto-generates the URL slug)
-   - **Published Date**: When the post was published
-   - **Excerpt**: A short summary for the listing page
-   - **Content**: The full post content (rich text editor)
-5. Click **"Save"** to create the post
+1. Go to `/keystatic`
+2. Log in with your Keystatic Cloud account
+3. Click **"Posts"** in the sidebar
+4. Click **"Create"** to add a new post
+5. Fill in the title, date, excerpt, and content
+6. Click **"Save"** to create the post
 
 ## Tech Stack
 
 - **Framework**: Next.js 16 (App Router)
-- **CMS**: Keystatic
+- **CMS**: Keystatic Cloud
 - **Styling**: Tailwind CSS 4
-- **Authentication**: GitHub OAuth
 - **Deployment**: Vercel
 
 ## License

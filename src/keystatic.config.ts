@@ -1,17 +1,12 @@
 import { config, fields, collection } from '@keystatic/core';
 
-// Determine storage mode based on environment
-const isLocal = process.env.NODE_ENV === 'development';
-
-const storage = isLocal
-  ? ({ kind: 'local' } as const)
-  : ({
-      kind: 'github',
-      repo: `${process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_OWNER}/${process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_SLUG}`,
-    } as const);
-
 export default config({
-  storage,
+  storage: {
+    kind: 'cloud',
+  },
+  cloud: {
+    project: 'traders-blog/traders-blog', // Update this with your Keystatic Cloud project slug
+  },
   collections: {
     posts: collection({
       label: 'Posts',
