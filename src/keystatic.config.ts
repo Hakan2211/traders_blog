@@ -14,28 +14,17 @@ const repoName =
   process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_SLUG ??
   process.env.VERCEL_GIT_REPO_SLUG;
 
-const hasGithubEnv =
-  !!process.env.KEYSTATIC_GITHUB_CLIENT_ID &&
-  !!process.env.KEYSTATIC_GITHUB_CLIENT_SECRET &&
-  !!process.env.KEYSTATIC_SECRET;
-
 const shouldUseGithubStorage =
-  process.env.NODE_ENV !== 'development' &&
-  hasGithubEnv &&
-  !!repoOwner &&
-  !!repoName;
+  process.env.NODE_ENV !== 'development' && !!repoOwner && !!repoName;
 
 if (process.env.NODE_ENV !== 'development' && !shouldUseGithubStorage) {
   console.warn(
     [
       '[keystatic] GitHub storage mode requires the following env vars:',
-      '- KEYSTATIC_GITHUB_CLIENT_ID',
-      '- KEYSTATIC_GITHUB_CLIENT_SECRET',
-      '- KEYSTATIC_SECRET',
-      '- VERCEL_GIT_REPO_OWNER (or NEXT_PUBLIC_VERCEL_GIT_REPO_OWNER)',
-      '- VERCEL_GIT_REPO_SLUG (or NEXT_PUBLIC_VERCEL_GIT_REPO_SLUG)',
+      '- NEXT_PUBLIC_VERCEL_GIT_REPO_OWNER (or VERCEL_GIT_REPO_OWNER)',
+      '- NEXT_PUBLIC_VERCEL_GIT_REPO_SLUG (or VERCEL_GIT_REPO_SLUG)',
       '',
-      'Falling back to local storage so the build can proceed.',
+      'Falling back to local storage. (On Vercel this is read-only; you will not be able to create/edit content.)',
     ].join('\n')
   );
 }

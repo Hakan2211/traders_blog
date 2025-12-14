@@ -2,6 +2,9 @@ import { makeRouteHandler } from '@keystatic/next/route-handler';
 import config from '@/keystatic.config';
 import { NextRequest } from 'next/server';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 // Force removal of the App Slug which might trigger the wrong Auth flow (GitHub App vs OAuth App)
 // The user has configured an OAuth App, so this variable should not be present.
 // We delete it here to ensure Keystatic uses the correct OAuth flow.
