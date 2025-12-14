@@ -19,7 +19,6 @@ try {
 const { GET: _GET, POST: _POST } = makeRouteHandler({
   config,
 });
-
 export const POST = _POST;
 
 export async function GET(req: NextRequest, props: any) {

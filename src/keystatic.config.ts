@@ -9,6 +9,10 @@ export default config({
         }
       : {
           kind: 'github',
+          // @ts-ignore
+          clientId: process.env.KEYSTATIC_GITHUB_CLIENT_ID,
+          // @ts-ignore
+          clientSecret: process.env.KEYSTATIC_GITHUB_CLIENT_SECRET,
           repo: {
             owner:
               process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_OWNER ||
