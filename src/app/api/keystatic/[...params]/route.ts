@@ -21,8 +21,8 @@ const hasGithubAuthEnv =
   !!process.env.KEYSTATIC_GITHUB_CLIENT_SECRET &&
   !!process.env.KEYSTATIC_SECRET;
 
-let _GET: (req: NextRequest) => Promise<Response>;
-let _POST: (req: NextRequest) => Promise<Response>;
+let _GET: any;
+let _POST: any;
 
 // Avoid failing the build if GitHub auth env vars aren't present.
 // When `keystatic.config.ts` falls back to `local` storage, Keystatic doesn't need these.
@@ -55,7 +55,9 @@ if ((config as any)?.storage?.kind === 'github' && !hasGithubAuthEnv) {
   _POST = handlers.POST;
 }
 
-export const POST = _POST;
+export async function POST(req: NextRequest, props: any) {
+  return _POST(req, props);
+}
 
 export async function GET(req: NextRequest, props: any) {
   const url = new URL(req.url);
@@ -124,7 +126,7 @@ export async function GET(req: NextRequest, props: any) {
     console.log(`[DEBUG] Incoming Callback URL Pathname: ${url.pathname}`);
   }
 
-  const response = await _GET(req);
+  const response = await _GET(req, props);
 
   if (isCallback) {
     console.log(`--- [DEBUG] Handler Response Status: ${response.status} ---`);
