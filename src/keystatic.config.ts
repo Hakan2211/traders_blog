@@ -1,11 +1,21 @@
 import { config, fields, collection } from '@keystatic/core';
 
+// Get project key from environment variable
+// Users can set this in Vercel: NEXT_PUBLIC_KEYSTATIC_PROJECT
+const keystatic_project =
+  process.env.NEXT_PUBLIC_KEYSTATIC_PROJECT || 'hakanda/tradersblog';
+
 export default config({
-  storage: {
-    kind: 'cloud',
-  },
+  storage:
+    process.env.NODE_ENV === 'development'
+      ? {
+          kind: 'local',
+        }
+      : {
+          kind: 'cloud',
+        },
   cloud: {
-    project: 'hakanda/tradersblog',
+    project: keystatic_project,
   },
   collections: {
     posts: collection({
