@@ -5,6 +5,9 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+// Your stable production domain - this MUST match your GitHub OAuth callback URL
+const PRODUCTION_URL = 'https://traders-blog-hazel.vercel.app';
+
 // Check if GitHub auth environment variables are present
 const hasGithubAuthEnv =
   !!process.env.KEYSTATIC_GITHUB_CLIENT_ID &&
@@ -14,31 +17,12 @@ const hasGithubAuthEnv =
 // Determine if we need GitHub storage based on the config
 const isGithubStorage = (config as any)?.storage?.kind === 'github';
 
-// Determine the correct base URL for OAuth callbacks
-// Priority: KEYSTATIC_URL > VERCEL_PROJECT_PRODUCTION_URL > VERCEL_URL > localhost
-function getBaseUrl(): string {
-  if (process.env.KEYSTATIC_URL) {
-    return process.env.KEYSTATIC_URL;
-  }
-  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
-    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
-  }
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  return 'http://localhost:3000';
-}
-
-const baseUrl = getBaseUrl();
-
-// Log configuration on startup (only in production for debugging)
+// Log configuration on startup
 if (process.env.NODE_ENV === 'production') {
   console.log('[Keystatic] Configuration:', {
     isGithubStorage,
     hasGithubAuthEnv,
-    baseUrl,
-    repoOwner: process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_OWNER || 'NOT SET',
-    repoSlug: process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_SLUG || 'NOT SET',
+    productionUrl: PRODUCTION_URL,
   });
 }
 
@@ -46,9 +30,7 @@ if (process.env.NODE_ENV === 'production') {
 let handlers: { GET: any; POST: any };
 
 if (isGithubStorage && !hasGithubAuthEnv) {
-  console.error(
-    '[Keystatic] GitHub storage mode requires: KEYSTATIC_GITHUB_CLIENT_ID, KEYSTATIC_GITHUB_CLIENT_SECRET, KEYSTATIC_SECRET'
-  );
+  console.error('[Keystatic] Missing required environment variables');
 
   const errorResponse = () =>
     new Response(
@@ -68,7 +50,6 @@ if (isGithubStorage && !hasGithubAuthEnv) {
     POST: errorResponse,
   };
 } else {
-  // Create the route handler with GitHub OAuth credentials and explicit base URL
   handlers = makeRouteHandler({
     config,
     clientId: process.env.KEYSTATIC_GITHUB_CLIENT_ID,
@@ -77,30 +58,56 @@ if (isGithubStorage && !hasGithubAuthEnv) {
   });
 }
 
-// Wrap GET to add debugging for OAuth callback
+// Helper to rewrite request URL to use production domain
+function rewriteRequestUrl(req: NextRequest): NextRequest {
+  const originalUrl = new URL(req.url);
+  const productionUrlObj = new URL(PRODUCTION_URL);
+
+  // Only rewrite if we're on Vercel and the host doesn't match production
+  if (process.env.VERCEL && originalUrl.host !== productionUrlObj.host) {
+    const newUrl = new URL(req.url);
+    newUrl.protocol = productionUrlObj.protocol;
+    newUrl.host = productionUrlObj.host;
+
+    console.log('[Keystatic] Rewriting URL:', {
+      from: req.url,
+      to: newUrl.toString(),
+    });
+
+    // Create new request with rewritten URL
+    return new NextRequest(newUrl.toString(), {
+      method: req.method,
+      headers: req.headers,
+      body: req.body,
+    });
+  }
+
+  return req;
+}
+
 export async function GET(req: NextRequest, context: any) {
   const url = new URL(req.url);
 
   // Debug OAuth callback
-  if (url.pathname.includes('oauth/callback')) {
-    console.log('[Keystatic OAuth Callback]', {
-      url: req.url,
-      baseUrl,
+  if (url.pathname.includes('oauth')) {
+    console.log('[Keystatic OAuth]', {
+      path: url.pathname,
+      originalUrl: req.url,
       hasCode: !!url.searchParams.get('code'),
       hasState: !!url.searchParams.get('state'),
       error: url.searchParams.get('error'),
-      errorDescription: url.searchParams.get('error_description'),
     });
   }
 
   try {
-    const response = await handlers.GET(req, context);
+    // Rewrite request URL to use production domain
+    const rewrittenReq = rewriteRequestUrl(req);
+    const response = await handlers.GET(rewrittenReq, context);
 
-    // Log failed auth attempts
-    if (url.pathname.includes('oauth/callback') && response.status !== 302) {
-      console.error('[Keystatic OAuth Error]', {
+    if (url.pathname.includes('oauth/callback')) {
+      console.log('[Keystatic OAuth Callback Response]', {
         status: response.status,
-        statusText: response.statusText,
+        location: response.headers.get('location'),
       });
     }
 
@@ -116,7 +123,8 @@ export async function GET(req: NextRequest, context: any) {
 
 export async function POST(req: NextRequest, context: any) {
   try {
-    return await handlers.POST(req, context);
+    const rewrittenReq = rewriteRequestUrl(req);
+    return await handlers.POST(rewrittenReq, context);
   } catch (error) {
     console.error('[Keystatic POST Error]', error);
     return NextResponse.json(
