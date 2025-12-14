@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { User } from 'lucide-react';
+import Image from 'next/image';
 
 interface Post {
   slug: string;
@@ -13,7 +13,19 @@ interface Post {
   };
 }
 
-export function PostsList({ posts }: { posts: Post[] }) {
+interface Settings {
+  headline: string | null;
+  bio: string | null;
+  avatar: string | null;
+}
+
+export function PostsList({
+  posts,
+  settings,
+}: {
+  posts: Post[];
+  settings: Settings | null;
+}) {
   // Group posts by year
   const postsByYear = posts.reduce((acc, post) => {
     const date = post.entry.publishedDate
@@ -32,6 +44,13 @@ export function PostsList({ posts }: { posts: Post[] }) {
     .map(Number)
     .sort((a, b) => b - a);
 
+  // Fallback data
+  const headline = settings?.headline || 'Welcome to my blog';
+  const bio =
+    settings?.bio ||
+    'Introduce yourself here.\n\nHey my name is [Your Name]. My interests are [Your Interests].\n\nAdd a short bio here.';
+  const avatar = settings?.avatar || '/hero_image.jpg';
+
   return (
     <div className="max-w-3xl mx-auto px-6 py-24">
       {/* Introduction Section */}
@@ -41,21 +60,27 @@ export function PostsList({ posts }: { posts: Post[] }) {
         transition={{ duration: 0.6 }}
         className="flex flex-col md:flex-row items-center gap-8 mb-24"
       >
-        <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-neutral-800 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden relative">
-          {/* Placeholder for user image - replace with actual Image component */}
-          <User className="w-12 h-12 text-neutral-500" />
+        <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-neutral-900 border-2 border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.05)] flex items-center justify-center shrink-0 overflow-hidden relative ring-1 ring-white/10">
+          <Image
+            src={avatar}
+            alt="Profile"
+            width={128}
+            height={128}
+            className="w-full h-full object-cover"
+          />
         </div>
         <div className="text-center md:text-left">
-          <h1 className="text-3xl font-bold text-white mb-3">The Trader</h1>
-          <p className="text-neutral-400 leading-relaxed max-w-lg">
-            Documenting the journey through volatile markets. Focusing on price
-            action, psychology, and finding edge in the noise.
-          </p>
+          <h1 className="text-4xl font-bold text-white mb-4 tracking-tight">
+            {headline}
+          </h1>
+          <div className="text-neutral-300 leading-relaxed max-w-lg text-lg whitespace-pre-wrap">
+            {bio}
+          </div>
         </div>
       </motion.div>
 
       {/* Posts List */}
-      <div className="space-y-16">
+      <div className="space-y-20">
         {years.length > 0 ? (
           years.map((year, yearIndex) => (
             <motion.section
@@ -64,10 +89,11 @@ export function PostsList({ posts }: { posts: Post[] }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 + yearIndex * 0.1 }}
             >
-              <h2 className="text-xl font-mono text-neutral-500 mb-8 pl-4 border-l border-white/10">
+              <h2 className="text-2xl font-bold text-white/90 mb-10 flex items-center gap-4">
                 {year}
+                <div className="h-px bg-white/10 grow" />
               </h2>
-              <div className="space-y-8">
+              <div className="space-y-6">
                 {postsByYear[year]
                   .sort((a, b) => {
                     const dateA = a.entry.publishedDate
@@ -82,13 +108,13 @@ export function PostsList({ posts }: { posts: Post[] }) {
                     <Link
                       key={post.slug}
                       href={`/blog/${post.slug}`}
-                      className="group block p-4 -mx-4 rounded-xl hover:bg-neutral-900/50 transition-colors"
+                      className="group block p-6 -mx-6 rounded-2xl hover:bg-white/3 border border-transparent hover:border-white/10 transition-all duration-300 hover:shadow-lg hover:shadow-black/20"
                     >
                       <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 sm:gap-8">
-                        <h3 className="text-lg font-medium text-neutral-200 group-hover:text-blue-400 transition-colors">
+                        <h3 className="text-xl font-semibold text-neutral-100 group-hover:text-[#dfbd69] transition-colors tracking-tight">
                           {post.entry.title}
                         </h3>
-                        <span className="text-sm font-mono text-neutral-600 whitespace-nowrap shrink-0">
+                        <span className="text-sm font-mono text-neutral-500 group-hover:text-neutral-400 whitespace-nowrap shrink-0 transition-colors">
                           {post.entry.publishedDate
                             ? new Date(
                                 post.entry.publishedDate
@@ -100,7 +126,7 @@ export function PostsList({ posts }: { posts: Post[] }) {
                         </span>
                       </div>
                       {post.entry.excerpt && (
-                        <p className="mt-2 text-sm text-neutral-500 line-clamp-2 group-hover:text-neutral-400 transition-colors">
+                        <p className="mt-3 text-base text-neutral-400 line-clamp-2 group-hover:text-neutral-300 transition-colors leading-relaxed">
                           {post.entry.excerpt}
                         </p>
                       )}

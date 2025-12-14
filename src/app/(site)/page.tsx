@@ -3,6 +3,7 @@ import { PostsList } from '@/components/posts-list';
 
 export default async function HomePage() {
   const posts = await reader.collections.posts.all();
+  const settings = await reader.singletons.settings.read();
 
   // Serialize posts to remove functions (content) before passing to client component
   const serializedPosts = posts.map((post) => ({
@@ -13,5 +14,5 @@ export default async function HomePage() {
     },
   }));
 
-  return <PostsList posts={serializedPosts} />;
+  return <PostsList posts={serializedPosts} settings={settings} />;
 }

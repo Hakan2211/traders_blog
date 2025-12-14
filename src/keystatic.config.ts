@@ -1,4 +1,4 @@
-import { config, fields, collection } from '@keystatic/core';
+import { config, fields, collection, singleton } from '@keystatic/core';
 
 // Get project key from environment variable
 // Users can set this in Vercel: NEXT_PUBLIC_KEYSTATIC_PROJECT
@@ -16,6 +16,22 @@ export default config({
         },
   cloud: {
     project: keystatic_project,
+  },
+  singletons: {
+    settings: singleton({
+      label: 'Settings',
+      path: 'content/settings',
+      schema: {
+        headline: fields.text({ label: 'Headline' }),
+        bio: fields.text({ label: 'Bio', multiline: true }),
+        avatar: fields.image({
+          label: 'Avatar',
+          directory: 'public/images/avatar',
+          publicPath: '/images/avatar',
+        }),
+        twitterUrl: fields.text({ label: 'Twitter URL' }),
+      },
+    }),
   },
   collections: {
     posts: collection({
