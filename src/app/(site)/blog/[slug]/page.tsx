@@ -1,4 +1,4 @@
-import { reader } from '../../../lib/reader';
+import { reader } from '@/lib/reader';
 import { notFound } from 'next/navigation';
 import { DocumentRenderer } from '@keystatic/core/renderer';
 
@@ -7,15 +7,12 @@ export async function generateStaticParams() {
   return slugs.map((slug: string) => ({ slug }));
 }
 
-// 1. Update the type definition to wrap params in a Promise
 export default async function PostPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  // 2. Await the params object before using the slug
   const { slug } = await params;
-
   const post = await reader.collections.posts.read(slug);
 
   if (!post) return notFound();
@@ -23,12 +20,23 @@ export default async function PostPage({
   const content = await post.content();
 
   return (
-    <article className="max-w-3xl mx-auto py-10 px-4 prose lg:prose-xl dark:prose-invert">
-      <h1 className="font-bold text-4xl mb-4">{post.title}</h1>
-      <div className="text-gray-500 mb-8">
-        Published on: {post.publishedDate}
+    <article className="max-w-3xl mx-auto py-10 px-4">
+      <header className="mb-8">
+        <h1 className="font-bold text-4xl mb-4">{post.title}</h1>
+        {post.publishedDate && (
+          <div className="text-gray-500">
+            Published on: {post.publishedDate}
+          </div>
+        )}
+        {post.excerpt && (
+          <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
+            {post.excerpt}
+          </p>
+        )}
+      </header>
+      <div className="prose lg:prose-xl dark:prose-invert max-w-none">
+        <DocumentRenderer document={content} />
       </div>
-      <DocumentRenderer document={content} />
     </article>
   );
 }

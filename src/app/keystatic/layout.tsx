@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Keystatic Admin',
-  robots: 'noindex', // Crucial: Don't let Google index the admin page
+  robots: 'noindex',
 };
 
 export default function KeystaticLayout({
@@ -10,10 +10,5 @@ export default function KeystaticLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <html lang="en">
-      <head />
-      <body>{children}</body>
-    </html>
-  );
+  return <div className="keystatic-admin">{children}</div>;
 }
