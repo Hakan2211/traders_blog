@@ -4,17 +4,20 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  // Only allow in production for debugging (you can remove this endpoint after fixing)
   const config = {
     environment: process.env.NODE_ENV,
     vercel: {
       isVercel: !!process.env.VERCEL,
-      url: process.env.VERCEL_URL || 'NOT SET',
+      // VERCEL_URL is the deployment URL (with hash)
+      VERCEL_URL: process.env.VERCEL_URL || 'NOT SET',
+      // VERCEL_PROJECT_PRODUCTION_URL is the stable production domain
+      VERCEL_PROJECT_PRODUCTION_URL:
+        process.env.VERCEL_PROJECT_PRODUCTION_URL || 'NOT SET',
     },
     github: {
       hasClientId: !!process.env.KEYSTATIC_GITHUB_CLIENT_ID,
       clientIdPrefix:
-        process.env.KEYSTATIC_GITHUB_CLIENT_ID?.substring(0, 5) || 'NOT SET',
+        process.env.KEYSTATIC_GITHUB_CLIENT_ID?.substring(0, 8) || 'NOT SET',
       hasClientSecret: !!process.env.KEYSTATIC_GITHUB_CLIENT_SECRET,
       clientSecretLength:
         process.env.KEYSTATIC_GITHUB_CLIENT_SECRET?.length || 0,
@@ -31,18 +34,25 @@ export async function GET() {
         process.env.VERCEL_GIT_REPO_SLUG ||
         'NOT SET',
     },
-    expectedCallbackUrl: `https://${
-      process.env.VERCEL_URL || 'YOUR_DOMAIN'
-    }/api/keystatic/github/oauth/callback`,
-    troubleshooting: {
-      step1:
-        'Verify your GitHub OAuth App callback URL matches exactly: https://YOUR_DOMAIN/api/keystatic/github/oauth/callback',
-      step2: 'Ensure KEYSTATIC_GITHUB_CLIENT_ID is set correctly in Vercel',
-      step3: 'Ensure KEYSTATIC_GITHUB_CLIENT_SECRET is set correctly in Vercel',
-      step4:
-        'Ensure KEYSTATIC_SECRET is a 64-character hex string (from: openssl rand -hex 32)',
-      step5:
-        'Make sure NEXT_PUBLIC_VERCEL_GIT_REPO_OWNER and NEXT_PUBLIC_VERCEL_GIT_REPO_SLUG are set',
+    urls: {
+      vercelUrl: `https://${process.env.VERCEL_URL || 'NOT_SET'}`,
+      productionUrl: `https://${
+        process.env.VERCEL_PROJECT_PRODUCTION_URL || 'NOT_SET'
+      }`,
+      expectedCallbackWithVercelUrl: `https://${
+        process.env.VERCEL_URL || 'NOT_SET'
+      }/api/keystatic/github/oauth/callback`,
+      expectedCallbackWithProductionUrl: `https://${
+        process.env.VERCEL_PROJECT_PRODUCTION_URL || 'NOT_SET'
+      }/api/keystatic/github/oauth/callback`,
+    },
+    fix: {
+      message:
+        'Your GitHub OAuth App callback URL should use the PRODUCTION URL, not the VERCEL_URL',
+      correctCallbackUrl: `https://${
+        process.env.VERCEL_PROJECT_PRODUCTION_URL ||
+        'traders-blog-hazel.vercel.app'
+      }/api/keystatic/github/oauth/callback`,
     },
   };
 

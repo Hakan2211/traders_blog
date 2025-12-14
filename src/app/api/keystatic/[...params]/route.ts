@@ -14,14 +14,29 @@ const hasGithubAuthEnv =
 // Determine if we need GitHub storage based on the config
 const isGithubStorage = (config as any)?.storage?.kind === 'github';
 
+// Determine the correct base URL for OAuth callbacks
+// Priority: KEYSTATIC_URL > VERCEL_PROJECT_PRODUCTION_URL > VERCEL_URL > localhost
+function getBaseUrl(): string {
+  if (process.env.KEYSTATIC_URL) {
+    return process.env.KEYSTATIC_URL;
+  }
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return 'http://localhost:3000';
+}
+
+const baseUrl = getBaseUrl();
+
 // Log configuration on startup (only in production for debugging)
 if (process.env.NODE_ENV === 'production') {
   console.log('[Keystatic] Configuration:', {
     isGithubStorage,
     hasGithubAuthEnv,
-    hasClientId: !!process.env.KEYSTATIC_GITHUB_CLIENT_ID,
-    hasClientSecret: !!process.env.KEYSTATIC_GITHUB_CLIENT_SECRET,
-    hasSecret: !!process.env.KEYSTATIC_SECRET,
+    baseUrl,
     repoOwner: process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_OWNER || 'NOT SET',
     repoSlug: process.env.NEXT_PUBLIC_VERCEL_GIT_REPO_SLUG || 'NOT SET',
   });
@@ -53,7 +68,7 @@ if (isGithubStorage && !hasGithubAuthEnv) {
     POST: errorResponse,
   };
 } else {
-  // Create the route handler with GitHub OAuth credentials
+  // Create the route handler with GitHub OAuth credentials and explicit base URL
   handlers = makeRouteHandler({
     config,
     clientId: process.env.KEYSTATIC_GITHUB_CLIENT_ID,
@@ -70,6 +85,7 @@ export async function GET(req: NextRequest, context: any) {
   if (url.pathname.includes('oauth/callback')) {
     console.log('[Keystatic OAuth Callback]', {
       url: req.url,
+      baseUrl,
       hasCode: !!url.searchParams.get('code'),
       hasState: !!url.searchParams.get('state'),
       error: url.searchParams.get('error'),
